@@ -1,83 +1,125 @@
-#About
-This plugin was created referencing the [Fingerprint Dialog sample](http://developer.android.com/samples/FingerprintDialog/index.html) and the [Confirm Credential sample](http://developer.android.com/samples/ConfirmCredential/index.html) referenced by the [Android 6.0 APIs webpage](http://developer.android.com/about/versions/marshmallow/android-6.0.html).
+# Cordova Plugin Fingerprint All-In-One
+## **Android** and **iOS**
 
-This plugin will open a native dialog fragment prompting the user to authenticate using their fingerprint.  If the device has a secure lockscreen (pattern, PIN, or password), the user may opt to authenticate using that method as a backup.
+[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/cordova-plugin-fingerprint-aio)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/NiklasMerz/cordova-plugin-fingerprint-aio/master/LICENSE)
+[![Build Status](https://travis-ci.org/NiklasMerz/cordova-plugin-fingerprint-aio.svg?branch=master)](https://travis-ci.org/NiklasMerz/cordova-plugin-fingerprint-aio)
+[![Issue Count](https://codeclimate.com/github/NiklasMerz/cordova-plugin-fingerprint-aio/badges/issue_count.svg)](https://codeclimate.com/github/NiklasMerz/cordova-plugin-fingerprint-aio)
 
-#Screenshots
-###Fingerprint Auth Dialog###
-![Fingerprint Auth Dialog](screenshots/fp_auth_dialog.jpg) | ![Fingerprint Auth Dialog Success](screenshots/fp_auth_dialog_success.png) | ![Fingerprint Auth Dialog Fail](screenshots/fp_auth_dialog_fail.jpg) | ![Fingerprint Auth Dialog Too Many](screenshots/fp_auth_dialog_too_many.jpg) | ![Fingerprint Auth Dialog No Backup](screenshots/fp_auth_dialog_no_backup.jpg) | ![Fingerprint Auth Dialog No Backup](screenshots/fp_auth_dialog_longer.png)
-###Backup Credentials###
-![Confirm Password](screenshots/confirm_creds_pw.png) | ![Confirm PIN](screenshots/confirm_creds_pin.png) | ![Confirm Pattern](screenshots/confirm_creds_pattern.png)
+[![NPM](https://nodei.co/npm/cordova-plugin-fingerprint-aio.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/cordova-plugin-fingerprint-aio/)
 
 
-#Installation
-`meteor add cordova:cordova-plugin-android-fingerprint-auth`
+**This plugin provides a single and simple interface for accessing fingerprint APIs on both Android 6+ and iOS.**
 
-#Setup
-Add preference to mobile-config.js
+## Features
+
+* Check if fingerprint scanner is available
+* Fingerprint authentication
+* Ionic Native support
+* ngCordova support
+* Fallback options
+* Now with **FaceID** on iPhone X
+
+### Platforms
+
+* Android - Minimum SDK 23
+* iOS - **XCode 9.2 or higher** required
+  * _Please set `<preference name="UseSwiftLanguageVersion" value="3.2" />` in your config.xml_
+
+
+## How to use
+
+---
+
+**[Tutorial about using this plugin with Ionic](https://www.youtube.com/watch?v=tQDChMJ6er8)** thanks to Paul Halliday
+
+[Examples](https://github.com/NiklasMerz/fingerprint-aio-demo)
+
+[ngCordova Example](https://github.com/NiklasMerz/fingerprint-aio-demo/tree/ng-cordova)
+
+[Ionic Native Example](https://github.com/NiklasMerz/fingerprint-aio-demo/tree/ionic-native)
+
+---
+
+### Install
+
+**Install from NPM**
+
 ```
-App.setPreference('android-targetSdkVersion', '23');
+cordova plugin add cordova-plugin-fingerprint-aio --save
 ```
 
-set compile version and build tools in build.gradle
+If you want to set a FaceID description use:
+
 ```
-compileSdkVersion 23
-buildToolsVersion "23.0.2"
+cordova plugin add cordova-plugin-fingerprint-aio --variable FACEID_USAGE_DESCRIPTION="Login now...."
 ```
 
-#API
-###FingerprintAuth.show###
-```
-FingerprintAuth.show({
-            clientId: "myAppName",
-            clientSecret: "a_very_secret_encryption_key"
-        }, successCallback, errorCallback);
+**Use Release candidate**
 
-/**
- * @return {withFingerprint:base64EncodedString, withPassword:boolean}
- */
-function successCallback(result) {
-    console.log("successCallback(): " + JSON.stringify(result));
-    if (result.withFingerprint) {
-        console.log("Successfully authenticated using a fingerprint");
-    } else if (result.withPassword) {
-        console.log("Authenticated with backup password");
+You can use preview versions with the `rc` tag on npm.
+
+```
+cordova plugin add cordova-plugin-fingerprint-aio@rc
+```
+
+**Use this Github repo**
+
+Get the latest development version. *Not recommended!*
+
+```
+cordova plugin add https://github.com/NiklasMerz/cordova-plugin-fingerprint-aio.git
+```
+
+### Check if fingerprint authentication is available
+```javascript
+Fingerprint.isAvailable(isAvailableSuccess, isAvailableError);
+
+    function isAvailableSuccess(result) {
+      /*
+      result depends on device and os. 
+      iPhone X will return 'face' other Android or iOS devices will return 'finger'  
+      */
+      alert("Fingerprint available");
     }
-}
 
-function errorCallback(error) {
-    console.log(error); // "Fingerprint authentication not available"
-}
-
-```
-Opens a native dialog fragment to use the device hardware fingerprint scanner to authenticate against fingerprints
-registered for the device.
-
-`clientId` will be used as the alias for your key in the Android Key Store.
-`clientSecret` will be used to encrypt the token returned upon successful fingerprint authentication.
-
-###FingerprintAuth.isAvailable###
-```
-FingerprintAuth.isAvailable(isAvailableSuccess, isAvailableError);
-
-/**
- * @return {
- *      isAvailable:boolean,
- *      isHardwareDetected:boolean,
- *      hasEnrolledFingerprints:boolean
- *   }
- */
-function isAvailableSuccess(result) {
-    console.log("FingerprintAuth available: " + JSON.stringify(result));
-    if (result.isAvailable) {
-        FingerprintAuth.show({
-                    clientId: "myAppName",
-                    clientSecret: "a_very_secret_encryption_key"
-                }, successCallback, errorCallback);
+    function isAvailableError(message) {
+      alert(message);
     }
-}
-
-function isAvailableError(message) {
-    console.log("isAvailableError(): " + message);
-}
 ```
+
+### Show authentication dialogue
+```javascript
+Fingerprint.show({
+      clientId: "Fingerprint-Demo",
+      clientSecret: "password" //Only necessary for Android
+    }, successCallback, errorCallback);
+
+    function successCallback(){
+      alert("Authentication successfull");
+    }
+
+    function errorCallback(err){
+      alert("Authentication invalid " + err);
+    }
+```
+**Optional parameters**
+
+* __disableBackup__: If true remove backup option on authentication dialogue for Android. Default false.
+* __localizedFallbackTitle__ (iOS only): Title of fallback button.
+* __localizedReason__ (iOS only): Description in authentication dialogue.
+
+## Thanks to the authors of the original fingerprint plugins
+
+Some code is refactored from their projects and I learned how to make Cordova plugins from their great plugins:
+
+@EddyVerbruggen and @mjwheatley
+
+[Android](https://github.com/mjwheatley/cordova-plugin-android-fingerprint-auth)
+
+[iOS](https://github.com/EddyVerbruggen/cordova-plugin-touch-id)
+
+## License
+
+* Project and iOS source -> MIT
+* Android source -> MIT and Apache 2.0
